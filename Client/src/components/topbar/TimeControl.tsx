@@ -1,3 +1,10 @@
+import {
+    ChevronDown,
+    ChevronUp,
+    Pause,
+    Play,
+    Square,
+} from "lucide-react";
 import { useState } from "react";
 
 const minSpeed = 0.25;
@@ -18,6 +25,12 @@ function TimeControl() {
         });
     };
 
+    const stop = () => {
+        setIsRunning(false);
+        setSpeed(1);
+        console.log("Stop clicked");
+    };
+
     const speedUp = () => {
         setSpeed((previous) => {
             const next = clampSpeed(previous + speedStep);
@@ -36,16 +49,49 @@ function TimeControl() {
 
     return (
         <div className="time-control" aria-label="time controls">
-            <button type="button" className="control-btn" onClick={togglePlayPause}>
-                {isRunning ? "Pause" : "Play"}
+            <button
+                type="button"
+                className="control-btn"
+                onClick={speedDown}
+                title="Speed down"
+                aria-label="Speed down"
+            >
+                <ChevronDown size={16} />
             </button>
-            <button type="button" className="control-btn" onClick={speedDown}>
-                Speed -
+
+            <button
+                type="button"
+                className="control-btn"
+                onClick={togglePlayPause}
+                title={isRunning ? "Pause" : "Play"}
+                aria-label={isRunning ? "Pause" : "Play"}
+            >
+                {isRunning ? <Pause size={16} /> : <Play size={16} />}
             </button>
-            <button type="button" className="control-btn" onClick={speedUp}>
-                Speed +
+
+            <button
+                type="button"
+                className="control-btn"
+                onClick={stop}
+                title="Stop"
+                aria-label="Stop"
+            >
+                <Square size={16} />
             </button>
-            <span className="speed-display">x{speed.toFixed(2)}</span>
+
+            <button
+                type="button"
+                className="control-btn"
+                onClick={speedUp}
+                title="Speed up"
+                aria-label="Speed up"
+            >
+                <ChevronUp size={16} />
+            </button>
+
+            <span className="speed-display" title={`Speed multiplier: ${speed.toFixed(2)}x`}>
+                x{speed.toFixed(2)}
+            </span>
         </div>
     );
 }

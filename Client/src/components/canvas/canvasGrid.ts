@@ -8,11 +8,19 @@ export type GridCell = {
     row: number;
 };
 
+export type GridTileMap = Record<string, string>;
+
 export type GridPalette = {
     background: string;
     line: string;
     hover: string;
     active: string;
+};
+
+export type TileStyleDefinition = {
+    id: string;
+    color: string;
+    accent?: string;
 };
 
 const defaultPalette: GridPalette = {
@@ -66,6 +74,28 @@ export const getCellFromPoint = (
     return { column, row };
 };
 
+export const getCellsBetween = (from: GridCell, to: GridCell): GridCell[] => {
+    const dx = to.column - from.column;
+    const dy = to.row - from.row;
+    const steps = Math.max(Math.abs(dx), Math.abs(dy));
+
+    if (steps === 0) {
+        return [from];
+    }
+
+    const cells: GridCell[] = [];
+
+    for (let step = 0; step <= steps; step += 1) {
+        const progress = step / steps;
+        cells.push({
+            column: Math.round(from.column + dx * progress),
+            row: Math.round(from.row + dy * progress),
+        });
+    }
+
+    return cells;
+};
+
 export const drawGrid = (
     context: CanvasRenderingContext2D,
     width: number,
@@ -73,7 +103,8 @@ export const drawGrid = (
     resolution: GridResolution,
     palette: GridPalette,
     hoveredCell: GridCell | null,
-    activeCells: Set<string>,
+    tiles: GridTileMap,
+    tileStyles: Record<string, TileStyleDefinition>,
 ) => {
     const columns = Math.max(1, resolution.columns);
     const rows = Math.max(1, resolution.rows);
@@ -84,14 +115,17 @@ export const drawGrid = (
     context.fillStyle = palette.background;
     context.fillRect(0, 0, width, height);
 
-    context.fillStyle = palette.active;
-    activeCells.forEach((key) => {
+    Object.entries(tiles).forEach(([key, tileId]) => {
         const [columnValue, rowValue] = key.split(":");
         const column = Number(columnValue);
         const row = Number(rowValue);
-        if (Number.isNaN(column) || Number.isNaN(row)) {
+        const tile = tileStyles[tileId];
+
+        if (Number.isNaN(column) || Number.isNaN(row) || !tile) {
             return;
         }
+
+        context.fillStyle = tile.color;
         context.fillRect(column * cellWidth, row * cellHeight, cellWidth, cellHeight);
     });
 

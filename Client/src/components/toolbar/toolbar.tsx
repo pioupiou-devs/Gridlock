@@ -1,20 +1,36 @@
 import ButtonHolder from "./ButtonHolder";
 import "./toolbar.css";
+import { defaultTools } from "./toolDefinitions";
 
-const staticButtonLabels = ["Brush", "Eraser", "Fill", "Reset"];
-const dynamicButtonPlaceholders = ["Action A", "Action B"];
+type ToolbarProps = {
+    activeToolId?: string;
+    onSelectTool?: (toolId: string) => void;
+};
 
-function Toolbar() {
+const dynamicButtonPlaceholders = [
+    { id: 'tool-a', label: 'Tool A', description: 'Backend-defined action placeholder' },
+    { id: 'tool-b', label: 'Tool B', description: 'Backend-defined action placeholder' },
+];
+
+function Toolbar({ activeToolId, onSelectTool }: ToolbarProps) {
     return (
         <div className="toolbar-wrap">
             <footer className="toolbar">
                 <div className="toolbar-section">
-                    <strong>Static</strong>
-                    <ButtonHolder labels={staticButtonLabels} />
+                    <strong>Tools</strong>
+                    <ButtonHolder
+                        tools={defaultTools}
+                        activeToolId={activeToolId}
+                        onSelectTool={onSelectTool}
+                    />
                 </div>
                 <div className="toolbar-section">
                     <strong>Dynamic</strong>
-                    <ButtonHolder labels={dynamicButtonPlaceholders} />
+                    <ButtonHolder
+                        tools={dynamicButtonPlaceholders}
+                        activeToolId={activeToolId}
+                        onSelectTool={onSelectTool}
+                    />
                 </div>
             </footer>
         </div>

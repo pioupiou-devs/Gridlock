@@ -1,18 +1,23 @@
 import ToolbarButton from "./ToolbarButton";
+import type { ToolDefinition } from "./toolDefinitions";
 
 type ButtonHolderProps = {
-    labels: string[];
+    tools: ToolDefinition[];
+    activeToolId?: string;
+    onSelectTool?: (toolId: string) => void;
 };
 
-function ButtonHolder({ labels }: ButtonHolderProps) {
+function ButtonHolder({ tools, activeToolId, onSelectTool }: ButtonHolderProps) {
     return (
         <div className="button-holder">
-            {labels.map((label) => (
+            {tools.map((tool) => (
                 <ToolbarButton
-                    key={label}
-                    label={label}
+                    key={tool.id}
+                    label={tool.label}
+                    title={tool.description ?? tool.label}
+                    selected={activeToolId === tool.id}
                     onClick={() => {
-                        console.log(`Toolbar button clicked: ${label}`);
+                        onSelectTool?.(tool.id);
                     }}
                 />
             ))}
