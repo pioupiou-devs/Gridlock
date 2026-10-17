@@ -1,11 +1,6 @@
-export type ToolKind = 'road' | 'source' | 'goal' | 'clear' | 'generic';
+import { resolveToolDefinition, type ToolDefinition, type ToolKind } from '../definitions';
 
-export type ToolDefinition = {
-  id: string;
-  label: string;
-  kind: ToolKind;
-  description?: string;
-};
+export type { ToolDefinition, ToolKind };
 
 export const defaultTools: ToolDefinition[] = [
   { id: 'road', label: 'Road', kind: 'road', description: 'Draw a straight road segment between two cells.' },
@@ -15,4 +10,4 @@ export const defaultTools: ToolDefinition[] = [
 ];
 
 export const getToolById = (toolId: string, tools: ToolDefinition[] = defaultTools) =>
-  tools.find((tool) => tool.id === toolId) ?? tools[0];
+  resolveToolDefinition(toolId, tools, tools[0]);

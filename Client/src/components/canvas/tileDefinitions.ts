@@ -1,11 +1,6 @@
-export type TileKind = 'road' | 'source' | 'goal' | 'clear' | 'generic';
+import { resolveTileDefinition, type TileDefinition, type TileKind } from '../definitions';
 
-export type TileDefinition = {
-  id: TileKind | string;
-  label: string;
-  color: string;
-  accent?: string;
-};
+export type { TileDefinition, TileKind };
 
 export const defaultTileDefinitions: TileDefinition[] = [
   { id: 'road', label: 'Road', color: '#fbbf24', accent: '#f59e0b' },
@@ -14,5 +9,7 @@ export const defaultTileDefinitions: TileDefinition[] = [
   { id: 'clear', label: 'Empty', color: 'transparent', accent: 'transparent' },
 ];
 
-export const getTileDefinition = (tileId: string) =>
-  defaultTileDefinitions.find((tile) => tile.id === tileId) ?? defaultTileDefinitions[3];
+export const getTileDefinition = (
+  tileId: string,
+  tiles: TileDefinition[] = defaultTileDefinitions,
+) => resolveTileDefinition(tileId, tiles, tiles[3]);

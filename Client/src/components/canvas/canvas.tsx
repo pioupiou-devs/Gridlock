@@ -11,22 +11,28 @@ import {
     type GridTileMap,
     type TileStyleDefinition,
 } from "./canvasGrid";
-import { defaultTileDefinitions } from "./tileDefinitions";
+import { defaultTileDefinitions, type TileDefinition } from "./tileDefinitions";
+import { defaultTools, type ToolDefinition } from "../toolbar/toolDefinitions";
 
 type CanvasProps = {
     resolution?: GridResolution;
     selectedToolId?: string;
     tiles?: GridTileMap;
+    toolDefinitions?: ToolDefinition[];
+    tileDefinitions?: TileDefinition[];
 };
 
-const tileStyles: Record<string, TileStyleDefinition> = Object.fromEntries(
-    defaultTileDefinitions.map((tile) => [tile.id, { id: tile.id, color: tile.color, accent: tile.accent }]),
-);
-
-function Canvas({ resolution = { columns: 16, rows: 16 }, selectedToolId = "road", tiles = {} }: CanvasProps) {
+function Canvas({
+    resolution = { columns: 16, rows: 16 },
+    selectedToolId = "road",
+    tiles = {},
+    toolDefinitions = [],
+    tileDefinitions = defaultTileDefinitions,
+}: CanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const hoveredCellRef = useRef<GridCell | null>(null);
     const dragStartRef = useRef<GridCell | null>(null);
+    const dragPreviewRef = useRef<GridCell[]>([]);
     const [tileMap, setTileMap] = useState<GridTileMap>(tiles);
     const normalizedResolution = useMemo(
         () => ({
@@ -34,6 +40,38 @@ function Canvas({ resolution = { columns: 16, rows: 16 }, selectedToolId = "road
             rows: Math.max(1, resolution.rows),
         }),
         [resolution.columns, resolution.rows],
+    );
+    const resolvedToolDefinitions = useMemo(
+        () => (toolDefinitions.length > 0 ? toolDefinitions : defaultTools),
+        [toolDefinitions],
+    );
+    const roadToolId = useMemo(
+        () => resolvedToolDefinitions.find((tool) => tool.kind === "road" || tool.id === "road")?.id ?? "road",
+        [resolvedToolDefinitions],
+    );
+    const clearToolId = useMemo(
+        () => resolvedToolDefinitions.find((tool) => tool.kind === "clear" || tool.id === "clear")?.id ?? "clear",
+        [resolvedToolDefinitions],
+    );
+    const isRoadToolActive = selectedToolId === roadToolId;
+    const isClearToolActive = selectedToolId === clearToolId;
+    const resolvedTileDefinitions = useMemo(
+        () => tileDefinitions.length > 0 ? tileDefinitions : defaultTileDefinitions,
+        [tileDefinitions],
+    );
+    const tileStyles = useMemo<Record<string, TileStyleDefinition>>(
+        () => Object.fromEntries(
+            resolvedTileDefinitions.map((tile) => [tile.id, {
+                id: tile.id,
+                color: tile.color,
+                accent: tile.accent,
+            }]),
+        ),
+        [resolvedTileDefinitions],
+    );
+    const roadTileId = useMemo(
+        () => resolvedTileDefinitions.some((tile) => tile.id === "road") ? "road" : resolvedTileDefinitions[0]?.id ?? "road",
+        [resolvedTileDefinitions],
     );
 
     useEffect(() => {
@@ -73,26 +111,43 @@ function Canvas({ resolution = { columns: 16, rows: 16 }, selectedToolId = "road
                 hoveredCellRef.current,
                 tileMap,
                 tileStyles,
+                dragPreviewRef.current,
             );
         };
 
-        const updateHoveredCell = (event: MouseEvent) => {
+        const getCellAtPointer = (event: MouseEvent): GridCell | null => {
             const rect = canvas.getBoundingClientRect();
-            const hoveredCell = getCellFromPoint(
+            return getCellFromPoint(
                 event.clientX - rect.left,
                 event.clientY - rect.top,
                 rect.width,
                 rect.height,
                 normalizedResolution,
             );
+        };
+
+        const updateHoveredCell = (event: MouseEvent) => {
+            const hoveredCell = getCellAtPointer(event);
             const current = hoveredCellRef.current;
             if (
                 current?.column === hoveredCell?.column &&
                 current?.row === hoveredCell?.row
             ) {
+                if (isRoadToolActive && dragStartRef.current) {
+                    const nextPreview = getCellsBetween(dragStartRef.current, hoveredCell ?? dragStartRef.current);
+                    const samePreview = nextPreview.length === dragPreviewRef.current.length &&
+                        nextPreview.every((cell, index) => cell.column === dragPreviewRef.current[index]?.column && cell.row === dragPreviewRef.current[index]?.row);
+                    if (!samePreview) {
+                        dragPreviewRef.current = nextPreview;
+                        render();
+                    }
+                }
                 return;
             }
             hoveredCellRef.current = hoveredCell;
+            if (isRoadToolActive && dragStartRef.current) {
+                dragPreviewRef.current = getCellsBetween(dragStartRef.current, hoveredCell ?? dragStartRef.current);
+            }
             render();
         };
 
@@ -105,47 +160,37 @@ function Canvas({ resolution = { columns: 16, rows: 16 }, selectedToolId = "road
         };
 
         const completeRoadDrawing = (event: MouseEvent) => {
-            const rect = canvas.getBoundingClientRect();
-            const currentCell = getCellFromPoint(
-                event.clientX - rect.left,
-                event.clientY - rect.top,
-                rect.width,
-                rect.height,
-                normalizedResolution,
-            );
             const origin = dragStartRef.current;
-            if (!currentCell || !origin) {
-                dragStartRef.current = null;
+            const currentCell = getCellAtPointer(event);
+
+            if (!origin) {
+                dragPreviewRef.current = [];
                 return;
             }
 
-            const lineCells = getCellsBetween(origin, currentCell);
+            const lineCells = currentCell ? getCellsBetween(origin, currentCell) : [origin];
             setTileMap((previous) => {
                 const next = { ...previous };
                 lineCells.forEach((cell) => {
-                    next[getCellKey(cell)] = "road";
+                    next[getCellKey(cell)] = roadTileId;
                 });
                 return next;
             });
             dragStartRef.current = null;
+            dragPreviewRef.current = [];
             render();
         };
 
         const handlePointerDown = (event: MouseEvent) => {
-            const rect = canvas.getBoundingClientRect();
-            const cell = getCellFromPoint(
-                event.clientX - rect.left,
-                event.clientY - rect.top,
-                rect.width,
-                rect.height,
-                normalizedResolution,
-            );
+            const cell = getCellAtPointer(event);
             if (!cell) {
                 return;
             }
 
-            if (selectedToolId === "road") {
+            if (isRoadToolActive) {
                 dragStartRef.current = cell;
+                dragPreviewRef.current = [cell];
+                render();
                 return;
             }
 
@@ -153,7 +198,7 @@ function Canvas({ resolution = { columns: 16, rows: 16 }, selectedToolId = "road
                 const next = { ...previous };
                 const key = getCellKey(cell);
 
-                if (selectedToolId === "clear") {
+                if (isClearToolActive) {
                     delete next[key];
                     return next;
                 }
@@ -179,7 +224,7 @@ function Canvas({ resolution = { columns: 16, rows: 16 }, selectedToolId = "road
             canvas.removeEventListener("mousedown", handlePointerDown);
             canvas.removeEventListener("mouseup", completeRoadDrawing);
         };
-    }, [normalizedResolution, selectedToolId, tileMap]);
+    }, [normalizedResolution, roadTileId, selectedToolId, tileMap, tileStyles]);
 
     return (
         <section className="canvas-panel">

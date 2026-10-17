@@ -3,6 +3,7 @@ import './App.css'
 import Canvas from './canvas/canvas';
 import Toolbar from './toolbar/toolbar';
 import { defaultTools } from './toolbar/toolDefinitions';
+import { defaultTileDefinitions } from './canvas/tileDefinitions';
 import Topbar from './topbar/topbar';
 
 function App() {
@@ -15,11 +16,14 @@ function App() {
         <Canvas
           resolution={{ columns: 32, rows: 18 }}
           selectedToolId={selectedToolId}
+          toolDefinitions={defaultTools}
+          tileDefinitions={defaultTileDefinitions}
         />
       </div>
       <Toolbar
         activeToolId={selectedToolId}
         onSelectTool={setSelectedToolId}
+        tools={defaultTools}
       />
     </div>
   )

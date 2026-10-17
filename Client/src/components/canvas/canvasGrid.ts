@@ -105,6 +105,7 @@ export const drawGrid = (
     hoveredCell: GridCell | null,
     tiles: GridTileMap,
     tileStyles: Record<string, TileStyleDefinition>,
+    previewCells: GridCell[] = [],
 ) => {
     const columns = Math.max(1, resolution.columns);
     const rows = Math.max(1, resolution.rows);
@@ -128,6 +129,19 @@ export const drawGrid = (
         context.fillStyle = tile.color;
         context.fillRect(column * cellWidth, row * cellHeight, cellWidth, cellHeight);
     });
+
+    const roadStyle = tileStyles.road;
+    if (roadStyle) {
+        previewCells.forEach((cell) => {
+            context.fillStyle = roadStyle.accent ?? roadStyle.color;
+            context.fillRect(
+                cell.column * cellWidth,
+                cell.row * cellHeight,
+                cellWidth,
+                cellHeight,
+            );
+        });
+    }
 
     if (hoveredCell) {
         context.fillStyle = palette.hover;
