@@ -1,0 +1,12 @@
+# .NET
+bin/
+obj/
+appsettings.Development.json
+
+# Node / React
+Client/node_modules/
+Client/dist/
+
+# IDEs
+.vs/
+.vscode/
