@@ -5,27 +5,30 @@ import Toolbar from './toolbar/toolbar';
 import { defaultTools } from './toolbar/toolDefinitions';
 import { defaultTileDefinitions } from './canvas/tileDefinitions';
 import Topbar from './topbar/topbar';
+import { SignalRProvider } from '../context/SignalRContext';
 
 function App() {
   const [selectedToolId, setSelectedToolId] = useState(defaultTools[0].id);
 
   return (
-    <div className="app-shell">
-      <Topbar />
-      <div className="canvas-zone">
-        <Canvas
-          resolution={{ columns: 32, rows: 18 }}
-          selectedToolId={selectedToolId}
-          toolDefinitions={defaultTools}
-          tileDefinitions={defaultTileDefinitions}
+    <SignalRProvider>
+      <div className="app-shell">
+        <Topbar />
+        {/* <div className="canvas-zone">
+          <Canvas
+            resolution={{ columns: 32, rows: 18 }}
+            selectedToolId={selectedToolId}
+            toolDefinitions={defaultTools}
+            tileDefinitions={defaultTileDefinitions}
+          />
+        </div> */}
+        <Toolbar
+          activeToolId={selectedToolId}
+          onSelectTool={setSelectedToolId}
+          tools={defaultTools}
         />
       </div>
-      <Toolbar
-        activeToolId={selectedToolId}
-        onSelectTool={setSelectedToolId}
-        tools={defaultTools}
-      />
-    </div>
+    </SignalRProvider>
   )
 }
 
