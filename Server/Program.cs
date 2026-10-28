@@ -1,4 +1,6 @@
-using Hubs;
+using SharedKernel.Services;
+using SharedKernel.SignalR;
+using SharedKernel.Simulation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,8 +25,7 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton<IKernelStorage, KernelStorage>();
 
 //Processors
-builder.Services.AddSingleton<ISimulationProcessor, TimeStepProcessor>();
-builder.Services.AddSingleton<ISimulationProcessor, SignalRBroadcastProcessor>();
+builder.Services.AddSingleton<ISimulationProcessor, TimeControlProcessor>();
 
 // Background service
 builder.Services.AddHostedService<SimulationEngine>();
