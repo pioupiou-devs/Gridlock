@@ -22,6 +22,12 @@ builder.Services.AddSignalR();
 // Custom service registery
 builder.Services.AddSingleton<IKernelStorage, KernelStorage>();
 
+//Processors
+builder.Services.AddSingleton<ISimulationProcessor, TimeStepProcessor>();
+
+// Background service
+builder.Services.AddHostedService<SimulationEngine>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -3,6 +3,8 @@ public class GridMatrix
     private readonly int size = 48;
     private readonly byte[] grid;
 
+    public int CurrentTick {get; set;}
+
     public GridMatrix(int size = 48)
     {
         this.size = size;
