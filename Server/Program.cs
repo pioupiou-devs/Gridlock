@@ -24,6 +24,7 @@ builder.Services.AddSingleton<IKernelStorage, KernelStorage>();
 
 //Processors
 builder.Services.AddSingleton<ISimulationProcessor, TimeStepProcessor>();
+builder.Services.AddSingleton<ISimulationProcessor, SignalRBroadcastProcessor>();
 
 // Background service
 builder.Services.AddHostedService<SimulationEngine>();

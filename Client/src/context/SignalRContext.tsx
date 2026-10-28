@@ -33,8 +33,8 @@ export const SignalRProvider: React.FC<{ children: React.ReactNode }> = ({ child
         console.log("[SignalR] Connecté au serveur .NET !");
 
         // Étape C : Branchement de l'écouteur du Hello World
-        connection.on("ReceiveMessage", (message: string) => {
-          console.log("[SignalR] Message reçu du Back-end :", message);
+        connection.on("ReceiveSimulationState", (data: { currentTick: number }) => {
+            console.debug("turn number is " + data.currentTick);
         });
       })
       .catch(err => console.error("[SignalR] Erreur de connexion :", err));
