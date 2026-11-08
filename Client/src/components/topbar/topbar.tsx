@@ -1,7 +1,7 @@
 import "./topbar.css";
 import FpsCounter from "./FpsCounter";
 import TimeControl from "./TimeControl";
-import React, { useContext } from 'react';
+import { useContext } from 'react';
 import { SignalRContext } from '../../context/SignalRContext';
 
 function Topbar() {

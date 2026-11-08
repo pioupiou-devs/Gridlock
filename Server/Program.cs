@@ -4,14 +4,19 @@ using SharedKernel.Simulation;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var allowedOrigins = (Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")
+    ?? Environment.GetEnvironmentVariable("FRONTEND_URL")
+    ?? "http://localhost:5173")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
 // Configure CORS policy to accept front end
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("SignalRPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyMethod()                     
-              .AllowAnyHeader()                     
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
               .AllowCredentials();
     });
 });

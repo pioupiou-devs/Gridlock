@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import './App.css'
-import Canvas from './canvas/canvas';
 import Toolbar from './toolbar/toolbar';
 import { defaultTools } from './toolbar/toolDefinitions';
-import { defaultTileDefinitions } from './canvas/tileDefinitions';
 import Topbar from './topbar/topbar';
 import { SignalRProvider } from '../context/SignalRContext';
 

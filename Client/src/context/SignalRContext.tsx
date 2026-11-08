@@ -14,9 +14,12 @@ export const SignalRProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
   useEffect(() => {
+    const backendUrl = (import.meta.env.VITE_BACKEND_URL as string | undefined) ?? "http://localhost:5281";
+    const hubUrl = `${backendUrl.replace(/\/$/, "")}/gridhub`;
+
     // Étape A : Configuration du constructeur officiel de Microsoft
     const newConnection = new HubConnectionBuilder()
-      .withUrl("http://localhost:5281/gridhub") // URL de votre serveur .NET
+      .withUrl(hubUrl)
       .withAutomaticReconnect()
       .build();
 
