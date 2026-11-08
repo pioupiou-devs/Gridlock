@@ -13,27 +13,46 @@ namespace SharedKernel.Simulation
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            PeriodicTimer timer = new(TimeSpan.FromSeconds(timeSpeed));
+            var currentSpeed = timeSpeed;
+            PeriodicTimer timer = new(TimeSpan.FromSeconds(currentSpeed));
 
-            while (await timer.WaitForNextTickAsync(stoppingToken))
+            while (!stoppingToken.IsCancellationRequested)
             {
                 // Pause mode
-                if (!isRunning) continue;
-
-                tickCount++;
-
-                foreach (var processor in simulationProcessors)
+                if (!isRunning)
                 {
-                    if(processor.CanBeParallel)
-                    {
-                        // run as parallel
-                        processor.Execute(kernel);
-                        continue;
-                    }
-                    
-                    processor.Execute(kernel);
+                    await Task.Delay(50, stoppingToken);
+                    continue;
                 }
 
+                // Run tick
+                await timer.WaitForNextTickAsync(stoppingToken);
+                tickCount++;
+                RunSimulationTick();
+
+                // Adapt to speed changes
+                if(currentSpeed != timeSpeed)
+                {
+                    currentSpeed = timeSpeed;
+                    timer.Dispose();
+                    timer = new(TimeSpan.FromSeconds(currentSpeed));
+                }
+
+            }
+        }
+
+        private void RunSimulationTick()
+        {
+            foreach (var processor in simulationProcessors)
+            {
+                if (processor.CanBeParallel)
+                {
+                    // run as parallel
+                    processor.Execute(kernel);
+                    continue;
+                }
+
+                processor.Execute(kernel);
             }
         }
 
@@ -45,6 +64,6 @@ namespace SharedKernel.Simulation
         public void SetTimeSpeed(float speed) => timeSpeed = speed;
         public float GetTimeSpeed() => timeSpeed;
         #endregion
-    
+
     }
 }
