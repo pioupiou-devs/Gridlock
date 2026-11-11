@@ -26,7 +26,9 @@ Important repository-specific baseline:
 
 ## 2. Mandatory 5-File Component Architecture
 
-**Regardless of component size or complexity**, every component in `Client/src/components/` **must** be encapsulated in its own dedicated folder containing these exact 5 files:
+**Regardless of component size or complexity**, every component in `Client/src/components/` **must** be encapsulated in its own dedicated folder containing these exact 5 files.
+
+**All component folders must live at the same level directly under `Client/src/components/` (no nested component folders).**
 
 ```text
 Client/src/components/ComponentName/
@@ -49,9 +51,21 @@ Client/src/components/ComponentName/
    * Return a structured, predictable object grouped by concern: `{ state, computed, refs, actions }`. (If a simple component has minimal logic, keep the hook lightweight while preserving the `{ state, computed, refs, actions }` contract for consistency).
 4. **`ComponentName.tsx`**:
    * Pure presentational layer. Call `useComponentName(...)` at the top, handle early returns (`isLoading`, `isError`, empty states), and render clean JSX.
-   * Keep private, unexported sub-components at the bottom of this file only if they are strictly visual helpers for this specific view.
+   * Avoid private, unexported sub-components. Prefer creating independent components in their own sibling folders under `Client/src/components/`.
 5. **`index.ts`**:
    * Re-export only `ComponentName` and public types from `./ComponentName.types`. Never export internal hooks or utils unless explicitly intended for external sharing.
+
+### 2.1 Decomposition rule (mandatory)
+
+* If a component needs child UI blocks (for example button groups, counters, controls), create each child as its own independent component folder at `Client/src/components/<ChildName>/` with the same 5-file structure.
+* Do not create nested structures like `Parent/Child/` for component folders.
+* Prefer sibling-component composition through `index.ts` imports.
+
+### 2.2 Naming and export consistency
+
+* Use PascalCase for component folder names and primary component files.
+* Keep one public component per folder.
+* Prefer named exports (`export function ...`) and barrel exports from `index.ts`.
 
 ## 3. Backend Communication: REST API (`Client/src/services/api/`)
 
