@@ -1,25 +1,30 @@
-import "./topbar.css";
-import FpsCounter from "./FpsCounter";
-import TimeControl from "./TimeControl";
-import { useContext } from 'react';
-import { SignalRContext } from '../../context/SignalRContext';
+import type { TopBarProps } from "./TopBar.types";
+import { useTopBar } from "./useTopBar";
+import { FpsCounter } from "../FpsCounter";
+import { TopBarTimeControl } from "../TopBarTimeControl";
+import "./TopBar.css";
 
-function Topbar() {
-    const context = useContext(SignalRContext);
+export function TopBar(_: TopBarProps) {
+    const { state, actions } = useTopBar();
 
     return (
         <header className="topbar">
             <div className="topbar-main">
-                <TimeControl />
+                <TopBarTimeControl
+                    isRunning={state.isRunning}
+                    speed={state.speed}
+                    onTogglePlayPause={actions.togglePlayPause}
+                    onStop={actions.stop}
+                    onSpeedUp={actions.speedUp}
+                    onSpeedDown={actions.speedDown}
+                />
                 <div className="score-placeholder">
                     <span>Score</span>
                     <strong>0</strong>
                 </div>
             </div>
-            <div>Status: {context?.isConnected ? "🟢 Online" : "🔴 Disconnected"}</div>
-            <FpsCounter />
+            <div>Status: {state.isConnected ? "🟢 Online" : "🔴 Disconnected"}</div>
+            <FpsCounter fps={state.fps} />
         </header>
     );
 }
-
-export default Topbar;
