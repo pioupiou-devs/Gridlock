@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext } from 'react';
+import { useState, useEffect, createContext, type ReactNode } from 'react';
 import { HubConnectionBuilder, HubConnection } from '@microsoft/signalr';
 
 export interface SignalRContextType {
@@ -8,8 +8,11 @@ export interface SignalRContextType {
 
 export const SignalRContext = createContext<SignalRContextType | undefined>(undefined);
 
+type SignalRProviderProps = {
+  children: ReactNode;
+};
 
-export const SignalRProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function SignalRProvider({ children }: SignalRProviderProps) {
   const [connection, setConnection] = useState<HubConnection | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
@@ -54,4 +57,4 @@ export const SignalRProvider: React.FC<{ children: React.ReactNode }> = ({ child
       {children}
     </SignalRContext.Provider>
   );
-};
+}

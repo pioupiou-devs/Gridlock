@@ -1,41 +1,31 @@
-import ButtonHolder from "./ButtonHolder";
-import "./toolbar.css";
-import { defaultTools, type ToolDefinition } from "./toolDefinitions";
+import type { ToolbarProps } from "./Toolbar.types";
+import { useToolbar } from "./useToolbar";
+import { ButtonHolder } from "../ButtonHolder";
+import "./Toolbar.css";
 
-type ToolbarProps = {
-    activeToolId?: string;
-    onSelectTool?: (toolId: string) => void;
-    tools?: ToolDefinition[];
-};
+export function Toolbar({ activeToolId, onSelectTool, tools }: ToolbarProps) {
+    const { computed, actions } = useToolbar({ activeToolId, onSelectTool, tools });
 
-const dynamicButtonPlaceholders: ToolDefinition[] = [
-    { id: 'tool-a', label: 'Tool A', kind: 'generic', description: 'Backend-defined action placeholder' },
-    { id: 'tool-b', label: 'Tool B', kind: 'generic', description: 'Backend-defined action placeholder' },
-];
-
-function Toolbar({ activeToolId, onSelectTool, tools = defaultTools }: ToolbarProps) {
     return (
         <div className="toolbar-wrap">
             <footer className="toolbar">
                 <div className="toolbar-section">
                     <strong>Tools</strong>
                     <ButtonHolder
-                        tools={tools}
+                        tools={computed.tools}
                         activeToolId={activeToolId}
-                        onSelectTool={onSelectTool}
+                        onSelectTool={actions.handleSelectTool}
                     />
                 </div>
                 <div className="toolbar-section">
                     <strong>Dynamic</strong>
                     <ButtonHolder
-                        tools={dynamicButtonPlaceholders}
+                        tools={computed.dynamicButtonPlaceholders}
                         activeToolId={activeToolId}
-                        onSelectTool={onSelectTool}
+                        onSelectTool={actions.handleSelectTool}
                     />
                 </div>
             </footer>
         </div>
     );
 }
-
-export default Toolbar;
